@@ -327,13 +327,13 @@ in
 
   # The unit receives the bundled module root first, followed by the full
   # ABI-matched upstream Qt paths.
-  systemd.user.services.inir.environment = {
-    QML_IMPORT_PATH = inirFullQmlPath;
-    QML2_IMPORT_PATH = inirFullQmlPath;
-    QT_PLUGIN_PATH = inirQtPluginPath;
-    INIR_VENV = "${inirVenv}";
-    ILLOGICAL_IMPULSE_VIRTUAL_ENV = "${inirVenv}";
-  };
+  systemd.user.services.inir.serviceConfig.Environment = [
+    "QML_IMPORT_PATH=${inirFullQmlPath}"
+    "QML2_IMPORT_PATH=${inirFullQmlPath}"
+    "QT_PLUGIN_PATH=${inirQtPluginPath}"
+    "INIR_VENV=${inirVenv}"
+    "ILLOGICAL_IMPULSE_VIRTUAL_ENV=${inirVenv}"
+  ];
 
   environment.sessionVariables = {
     INIR_VENV = "${inirVenv}";

@@ -28,10 +28,6 @@
   services.fwupd.enable = true;
   services.upower.enable = true;
   services.power-profiles-daemon.enable = true;
-  services.ollama = {
-    enable = true;
-    package = pkgs.ollama-rocm;
-  };
   services.hardware.openrgb = {
     enable = true;
     motherboard = "amd";
@@ -60,5 +56,6 @@
     libva-utils
     mesa-demos
     clinfo
+    llama-cpp-vulkan
   ];
 }

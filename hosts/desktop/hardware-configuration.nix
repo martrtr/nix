@@ -16,8 +16,16 @@
     "sd_mod"
   ];
   boot.initrd.kernelModules = [ "amdgpu" ];
-  boot.kernelModules = [ "kvm-amd" ];
-  boot.extraModulePackages = [ ];
+  boot.kernelModules = [
+    "kvm-amd"
+    "v4l2loopback"
+  ];
+  boot.extraModulePackages = with config.boot.kernelPackages; [
+    v4l2loopback
+  ];
+  boot.extraModprobeConfig = ''
+    options v4l2loopback devices=1 video_nr=10 card_label="OBS Virtual Camera" exclusive_caps=1
+  '';
 
   hardware.cpu.amd.updateMicrocode =
     lib.mkDefault config.hardware.enableRedistributableFirmware;

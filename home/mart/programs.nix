@@ -47,6 +47,7 @@ in
   ]
   ++ (with pkgs; [
     pear-desktop
+    mihomo
 
     aseprite
     krita
@@ -70,9 +71,11 @@ in
     kdePackages.kio-extras
     kdePackages.ffmpegthumbs
     kdePackages.kdegraphics-thumbnailers
+    kdePackages.plasma-browser-integration
 
     imv
     mpv
+    obs-studio
     pavucontrol
     helvum
     networkmanagerapplet
@@ -95,6 +98,7 @@ in
     imagemagick
     yt-dlp
     gotop
+    scrcpy
 
     adw-gtk3
     whitesur-icon-theme
@@ -105,7 +109,7 @@ in
     enable = true;
     settings = {
       user = {
-        name = "march-taylor";
+        name = "martrtr";
         email = "mart.buffer.v3@gmail.com";
       };
       init.defaultBranch = "main";
@@ -196,11 +200,6 @@ in
           > "$mime_file"
       fi
 
-      if [ -f "$mime_file" ]; then
-        ${pkgs.gnused}/bin/sed -i \
-          's/^image\/png=imv-dir-2\.desktop;$/image\/png=imv-dir.desktop;/' \
-          "$mime_file"
-      fi
     done
   '';
 

@@ -12,9 +12,9 @@ in
     INIR_FALLBACK_SYSTEM_RUNTIME_DIR = runtime;
   };
 
-  systemd.user.services.inir.environment = {
-    INIR_RUNTIME_DIR = runtime;
-    INIR_SYSTEM_RUNTIME_DIR = runtime;
-    INIR_FALLBACK_SYSTEM_RUNTIME_DIR = runtime;
-  };
+  systemd.user.services.inir.serviceConfig.Environment = [
+    "INIR_RUNTIME_DIR=${runtime}"
+    "INIR_SYSTEM_RUNTIME_DIR=${runtime}"
+    "INIR_FALLBACK_SYSTEM_RUNTIME_DIR=${runtime}"
+  ];
 }

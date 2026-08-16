@@ -1,5 +1,11 @@
-{ ... }:
+{ config, lib, ... }:
 let
+  xdgDataDirs = lib.concatStringsSep ":" [
+    config.xdg.dataHome
+    "${config.home.profileDirectory}/share"
+    "/etc/profiles/per-user/${config.home.username}/share"
+    "/run/current-system/sw/share"
+  ];
   spring = damping: stiffness: {
     kind.spring = {
       damping-ratio = damping;
@@ -17,6 +23,11 @@ in
       ELECTRON_OZONE_PLATFORM_HINT = "auto";
       XDG_CURRENT_DESKTOP = "niri";
       XDG_MENU_PREFIX = "plasma-";
+      XDG_CONFIG_HOME = config.xdg.configHome;
+      XDG_DATA_HOME = config.xdg.dataHome;
+      XDG_CACHE_HOME = config.xdg.cacheHome;
+      XDG_STATE_HOME = config.xdg.stateHome;
+      XDG_DATA_DIRS = xdgDataDirs;
       QT_QPA_PLATFORM = "wayland";
       QT_LOGGING_RULES = "quickshell.dbus.properties=false";
     };
@@ -113,7 +124,7 @@ in
     };
 
     spawn-at-startup = [
-      { sh = "gsettings set org.gnome.desktop.interface color-scheme prefer-dark || true; gsettings set org.gnome.desktop.interface gtk-theme adw-gtk3-dark || true; gsettings set org.gnome.desktop.interface icon-theme WhiteSur-dark || true; systemctl --user import-environment QT_PLUGIN_PATH QT_QPA_PLATFORM QT_QPA_PLATFORMTHEME QT_STYLE_OVERRIDE XDG_CURRENT_DESKTOP XDG_MENU_PREFIX && kbuildsycoca6 --noincremental"; }
+      { sh = "gsettings set org.gnome.desktop.interface color-scheme prefer-dark || true; gsettings set org.gnome.desktop.interface gtk-theme adw-gtk3-dark || true; gsettings set org.gnome.desktop.interface icon-theme WhiteSur-dark || true; systemctl --user import-environment QT_PLUGIN_PATH QT_QPA_PLATFORM QT_QPA_PLATFORMTHEME QT_STYLE_OVERRIDE XDG_CURRENT_DESKTOP XDG_MENU_PREFIX XDG_CONFIG_HOME XDG_DATA_HOME XDG_CACHE_HOME XDG_STATE_HOME XDG_DATA_DIRS && dbus-update-activation-environment QT_PLUGIN_PATH QT_QPA_PLATFORM QT_QPA_PLATFORMTHEME QT_STYLE_OVERRIDE XDG_CURRENT_DESKTOP XDG_MENU_PREFIX XDG_CONFIG_HOME XDG_DATA_HOME XDG_CACHE_HOME XDG_STATE_HOME XDG_DATA_DIRS && kbuildsycoca6 --noincremental"; }
       { argv = [ "wl-paste" "--type" "text" "--watch" "cliphist" "store" ]; }
       { argv = [ "wl-paste" "--type" "image" "--watch" "cliphist" "store" ]; }
       { argv = [ "zen-browser" ]; }

@@ -34,7 +34,10 @@ let
     inirRuntimeDependencies;
   inirCli = pkgs.writeShellApplication {
     name = "inir";
-    runtimeInputs = [ pkgs.systemd ];
+    runtimeInputs = [
+      pkgs.systemd
+      inirQuickshell
+    ];
     text = ''
       runtime="${inirRuntime}"
       export INIR_RUNTIME_DIR="$runtime"
@@ -59,6 +62,13 @@ in
   programs.inir.enable = false;
   home.packages = [ inirCli ];
 
+  assertions = [
+    {
+      assertion = !(config.systemd.user.services ? inir);
+      message = "inir.service is owned by the NixOS iNiR module, not Home Manager.";
+    }
+  ];
+
   home.activation.removeLegacyInirRuntimeSymlink = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
     runtime_link="${config.xdg.configHome}/quickshell/inir"
     if [ -L "$runtime_link" ]; then
@@ -70,7 +80,13 @@ in
   # on existing systems add only missing integration keys and preserve every
   # explicit setting. Store a content-addressed backup before any merge.
   home.activation.prepareMutableInirConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    config_dir="${config.xdg.configHome}/illogical-impulse"
+    config_dir_new="${config.xdg.configHome}/inir"
+    config_dir_legacy="${config.xdg.configHome}/illogical-impulse"
+    if [ -d "$config_dir_legacy" ] && [ ! -L "$config_dir_legacy" ]; then
+      config_dir="$config_dir_legacy"
+    else
+      config_dir="$config_dir_new"
+    fi
     config_file="$config_dir/config.json"
     backup_dir="${config.home.homeDirectory}/.local/state/inir/config-backups"
 

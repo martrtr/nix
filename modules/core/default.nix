@@ -7,6 +7,7 @@
   imports = [
     ./apps-directory.nix
     ./certificates.nix
+    ./speech.nix
     ./throne-compat.nix
     ./kokoro.nix
   ];
@@ -22,6 +23,8 @@
       25565
       # ComfyUI remote interface.
       8188
+      # llama.cpp, compatible with Ollama clients on the local network.
+      11434
     ];
 
     # Simple Voice Chat and Webcam mod use separate UDP sockets.
@@ -155,6 +158,7 @@
   security.sudo.wheelNeedsPassword = true;
 
   environment.systemPackages = with pkgs; [
+    android-tools
     git
     curl
     wget
