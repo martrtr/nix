@@ -14,6 +14,7 @@
     ./application-themes.nix
     ./audio.nix
     ./no-network-tray.nix
+    ./clash-verge.nix
   ];
 
   home.username = settings.username;
