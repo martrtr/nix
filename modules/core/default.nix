@@ -18,6 +18,18 @@
     enable = true;
     checkReversePath = "loose";
 
+    # Clash Verge / Mihomo TUN interfaces. Keep the historical relaxed
+    # reverse-path filtering fix for Discord RTC and explicitly trust traffic
+    # arriving from the TUN device so nftables does not drop return UDP.
+    trustedInterfaces = [
+      "Mihomo"
+      "Meta"
+    ];
+
+    extraReversePathFilterRules = ''
+      iifname { "Mihomo", "Meta" } accept comment "allow Clash Verge TUN"
+    '';
+
     allowedTCPPorts = [
       # Minecraft server.
       25565
