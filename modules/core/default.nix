@@ -116,6 +116,19 @@
     fstrim.enable = true;
     flatpak.enable = true;
 
+    # Keep the host resolver independent from Clash Verge/Mihomo. When the TUN
+    # process is stopped or fails during startup, /etc/resolv.conf must still
+    # point at a live resolver instead of becoming an empty resolvconf file.
+    # NetworkManager feeds per-link DNS into resolved; public DNS is only a
+    # fallback when the active link does not provide usable resolvers.
+    resolved = {
+      enable = true;
+      settings.Resolve.FallbackDNS = [
+        "1.1.1.1"
+        "8.8.8.8"
+      ];
+    };
+
     syncthing = {
       enable = true;
       user = settings.username;
