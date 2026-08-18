@@ -106,7 +106,7 @@ in
 
     clash-verge-autostart = {
       Unit = {
-        Description = "Start Clash Verge Rev in the Niri session";
+        Description = "Start Clash Verge Rev in the graphical session";
         Wants = [ "inir-theme-apply.service" ];
         After = [ "inir-theme-apply.service" ];
         PartOf = [ "graphical-session.target" ];
@@ -116,7 +116,7 @@ in
         Restart = "on-failure";
         RestartSec = 3;
       };
-      Install.WantedBy = [ "niri.service" ];
+      Install.WantedBy = [ "graphical-session.target" ];
     };
   };
 }
