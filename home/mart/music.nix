@@ -58,7 +58,7 @@ let
     version = "2024-03-23";
 
     src = pkgs.fetchzip {
-      url = "https://kasaneteto.jp/ongendl/index.cgi/extra/TETO-OUset240323.zip";
+      url = "https://kasaneteto.jp/assets/download/utau/TETO-OUset240323.zip";
       hash = "sha256-4kGitQsi/44RAcNHGxdkE/s1KdZhpjKRuAv9CgQCbnI=";
       stripRoot = false;
     };
