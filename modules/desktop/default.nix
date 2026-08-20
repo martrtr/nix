@@ -21,6 +21,25 @@ let
       "Space Grotesk"
     ];
   };
+
+  # Niri 26.04 uses libdisplay-info-sys 0.3, which requires libdisplay-info
+  # older than 0.4.0. Our pinned nixpkgs has already moved the default library
+  # to 0.4.0, so keep a private 0.3.0 build for Niri until the pin contains the
+  # upstream nixpkgs libdisplay-info_0_3 compatibility package.
+  niriLibdisplayInfo = pkgs.libdisplay-info.overrideAttrs (_: {
+    version = "0.3.0";
+    src = pkgs.fetchFromGitLab {
+      domain = "gitlab.freedesktop.org";
+      owner = "emersion";
+      repo = "libdisplay-info";
+      rev = "0.3.0";
+      hash = "sha256-nXf2KGovNKvcchlHlzKBkAOeySMJXgxMpbi5z9gLrdc=";
+    };
+  });
+
+  niriWithPopupFixes = pkgs.niri.override {
+    libdisplay-info = niriLibdisplayInfo;
+  };
 in
 {
   imports = [
@@ -29,10 +48,10 @@ in
     ./inir-runtime.nix
   ];
 
-  # niri-flake still defaults to its 25.08 stable package. Use the released
-  # Niri from our pinned nixpkgs instead; 25.11+ includes Smithay fixes for
-  # nested popup stacking, including xwayland-satellite popups used by X11 DAWs.
-  programs.niri.package = pkgs.niri;
+  # niri-flake still defaults to its 25.08 stable package. Use Niri 26.04 from
+  # our pinned nixpkgs: 25.11+ includes nested popup stacking fixes, including
+  # xwayland-satellite popups used by X11 DAWs such as REAPER.
+  programs.niri.package = niriWithPopupFixes;
 
   # Use the mature X11 SDDM greeter. Keep its login layout deliberately simple;
   # Niri itself provides US/Russian switching after login.
@@ -65,9 +84,9 @@ in
   security.polkit.enable = true;
 
   # Niri's default portal stack provides the compositor-specific services but
-  # otherwise falls back to a GTK file chooser.  Route FileChooser explicitly
+  # otherwise falls back to a GTK file chooser. Route FileChooser explicitly
   # through the KDE backend so Electron/GTK/Flatpak applications get the
-  # KIO-based file dialog used by Dolphin.  Keep GNOME for Niri-specific
+  # KIO-based file dialog used by Dolphin. Keep GNOME for Niri-specific
   # interfaces such as screencasting, with GTK as a general fallback.
   xdg.portal = {
     enable = true;
