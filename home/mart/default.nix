@@ -13,6 +13,7 @@
     ./session-services.nix
     ./application-themes.nix
     ./audio.nix
+    ./music.nix
     ./no-network-tray.nix
     ./clash-verge.nix
   ];
