@@ -29,6 +29,11 @@ in
     ./inir-runtime.nix
   ];
 
+  # niri-flake still defaults to its 25.08 stable package. Use the released
+  # Niri from our pinned nixpkgs instead; 25.11+ includes Smithay fixes for
+  # nested popup stacking, including xwayland-satellite popups used by X11 DAWs.
+  programs.niri.package = pkgs.niri;
+
   # Use the mature X11 SDDM greeter. Keep its login layout deliberately simple;
   # Niri itself provides US/Russian switching after login.
   services.xserver = {
