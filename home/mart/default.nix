@@ -14,6 +14,7 @@
     ./application-themes.nix
     ./audio.nix
     ./music.nix
+    ./bedrock-on-linux.nix
     ./no-network-tray.nix
     ./clash-verge.nix
   ];

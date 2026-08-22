@@ -109,14 +109,14 @@ in
         Description = "Start Clash Verge Rev in the graphical session";
         Wants = [ "inir-theme-apply.service" ];
         After = [ "inir-theme-apply.service" ];
-        PartOf = [ "graphical-session.target" ];
+        PartOf = [ "niri.service" ];
       };
       Service = {
         ExecStart = "/run/current-system/sw/bin/clash-verge";
         Restart = "on-failure";
         RestartSec = 3;
       };
-      Install.WantedBy = [ "graphical-session.target" ];
+      Install.WantedBy = [ "niri.service" ];
     };
   };
 }

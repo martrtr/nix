@@ -89,7 +89,9 @@ in
     playerctl
 
     btop
+    dysk
     fastfetch
+    songrec
     tree
     unzip
     zip

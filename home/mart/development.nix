@@ -12,6 +12,7 @@
     clippy
     rustc
     rustfmt
+    jdk25
 
     fd
     jq
