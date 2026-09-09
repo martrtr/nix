@@ -22,24 +22,6 @@ let
     ];
   };
 
-  # Niri 26.04 uses libdisplay-info-sys 0.3, which requires libdisplay-info
-  # older than 0.4.0. Our pinned nixpkgs has already moved the default library
-  # to 0.4.0, so keep a private 0.3.0 build for Niri until the pin contains the
-  # upstream nixpkgs libdisplay-info_0_3 compatibility package.
-  niriLibdisplayInfo = pkgs.libdisplay-info.overrideAttrs (_: {
-    version = "0.3.0";
-    src = pkgs.fetchFromGitLab {
-      domain = "gitlab.freedesktop.org";
-      owner = "emersion";
-      repo = "libdisplay-info";
-      rev = "0.3.0";
-      hash = "sha256-nXf2KGovNKvcchlHlzKBkAOeySMJXgxMpbi5z9gLrdc=";
-    };
-  });
-
-  niriWithPopupFixes = pkgs.niri.override {
-    libdisplay-info = niriLibdisplayInfo;
-  };
 in
 {
   imports = [
@@ -48,10 +30,10 @@ in
     ./inir-runtime.nix
   ];
 
-  # niri-flake still defaults to its 25.08 stable package. Use Niri 26.04 from
-  # our pinned nixpkgs: 25.11+ includes nested popup stacking fixes, including
-  # xwayland-satellite popups used by X11 DAWs such as REAPER.
-  programs.niri.package = niriWithPopupFixes;
+  # Use Niri from the pinned Nixpkgs. The former libdisplay-info 0.3 override
+  # was needed by an older Niri package, but Nixpkgs now carries the compatible
+  # dependency graph itself and the package no longer exposes that override.
+  programs.niri.package = pkgs.niri;
 
   # Use the mature X11 SDDM greeter. Keep its login layout deliberately simple;
   # Niri itself provides US/Russian switching after login.

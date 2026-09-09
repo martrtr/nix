@@ -48,6 +48,7 @@ in
   ++ (with pkgs; [
     pear-desktop
     mihomo
+    qbittorrent
 
     aseprite
     krita
@@ -57,9 +58,11 @@ in
     reaper
 
     osu-lazer-bin
+
     obsidian
     anki-bin
     blockbench
+    logisim-evolution
 
     kdePackages.dolphin
     kdePackages.kde-cli-tools

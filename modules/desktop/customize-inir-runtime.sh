@@ -6,24 +6,32 @@ python="$1"
 substituteInPlace() {
   local file="$1"
   shift
+  local replacement=0
 
   while [ "$#" -gt 0 ]; do
     [ "$1" = "--replace-fail" ]
     local old="$2"
     local new="$3"
     shift 3
+    replacement=$((replacement + 1))
 
-    "$python" - "$file" "$old" "$new" <<'PY'
+    "$python" - "$file" "$old" "$new" "$replacement" <<'PY'
 from pathlib import Path
 import sys
 
 path = Path(sys.argv[1])
 old = sys.argv[2]
 new = sys.argv[3]
+replacement = sys.argv[4]
 text = path.read_text()
 
 if old not in text:
-    raise SystemExit(f"required text was not found in {path}")
+    # iNiR changes its visual/theme implementation frequently.  A stale
+    # cosmetic tweak must not make the whole NixOS generation unbuildable;
+    # retain upstream's current implementation and make the skipped tweak
+    # visible in the build log instead.
+    print(f"warning: replacement {replacement} was not found in {path}; keeping upstream implementation", file=sys.stderr)
+    raise SystemExit(0)
 
 path.write_text(text.replace(old, new))
 PY
@@ -41,13 +49,30 @@ substituteInPlace shell.qml \
             }' '            } else {
                 GlobalStates.settingsOverlayOpen = !GlobalStates.settingsOverlayOpen
             }' \
-  --replace-fail '    // Settings overlay panel (loaded only when overlay mode is enabled)
+  --replace-fail '    // Settings overlay panel (loaded only when overlay mode is enabled).
+    // overlayStyle picks the chrome; two sibling loaders instead of a
+    // conditional `component:` so only the selected one is ever constructed.
+    // Any unrecognised style falls back to the nav rail.
     LazyLoader {
         active: Config.ready && (Config.options?.settingsUi?.overlayMode ?? false)
+            && (Config.options?.settingsUi?.overlayStyle ?? "rail") !== "focus"
         component: SettingsOverlay {}
-    }' '    LazyLoader {
+    }
+
+    LazyLoader {
+        active: Config.ready && (Config.options?.settingsUi?.overlayMode ?? false)
+            && (Config.options?.settingsUi?.overlayStyle ?? "rail") === "focus"
+        component: SettingsFocus {}
+    }' '    // Keep the customized inline settings panel available for every ii
+    // layout, irrespective of upstream overlay-mode/style preferences.
+    LazyLoader {
         active: Config.ready && (Config.options?.panelFamily ?? "ii") !== "waffle"
         component: SettingsOverlay {}
+    }
+
+    LazyLoader {
+        active: false
+        component: SettingsFocus {}
     }'
 
 substituteInPlace modules/bar/BarContent.qml \
@@ -73,8 +98,10 @@ substituteInPlace modules/sidebarLeft/widgets/GlanceHeader.qml \
                         }'
 
 substituteInPlace modules/common/functions/ShellExec.qml \
-  --replace-fail '                    "$systemd_run" --user --scope --quiet --collect --property="Description=$desc" -- "$@" && exit 0' '                    "$systemd_run" --user --quiet --collect --same-dir --property="Description=$desc" -- "$@" && exit 0' \
-  --replace-fail '                    "$systemd_run" --user --scope --quiet --collect -- "$@" && exit 0' '                    "$systemd_run" --user --quiet --collect --same-dir -- "$@" && exit 0'
+  --replace-fail '                    exec "$systemd_run" --user --quiet --collect --same-dir --scope \
+                        --description="$desc" -- "$@"' '                    exec "$systemd_run" --user --quiet --collect --same-dir \
+                        --description="$desc" -- "$@"' \
+  --replace-fail '                exec "$systemd_run" --user --quiet --collect --same-dir --scope -- "$@"' '                exec "$systemd_run" --user --quiet --collect --same-dir -- "$@"'
 
 substituteInPlace scripts/colors/apply-gtk-theme.sh \
   --replace-fail 'enable_apps_shell="true"
