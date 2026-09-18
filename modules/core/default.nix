@@ -24,6 +24,10 @@
     trustedInterfaces = [
       "Mihomo"
       "Meta"
+      # Radmin is a private authenticated overlay.  Minecraft "Open to LAN"
+      # chooses a random TCP port, so allowing only 25565 would still block
+      # every hosted LAN world from Radmin peers.
+      "radminvpn0"
     ];
 
     extraReversePathFilterRules = ''
@@ -190,6 +194,9 @@
     nvme-cli
     e2fsprogs
     nix-output-monitor
+    icu
+    zoxide
+    songrec
   ];
 
   system.stateVersion = settings.stateVersion;

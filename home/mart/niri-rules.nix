@@ -8,9 +8,10 @@
   programs.niri.settings.window-rules = lib.mkAfter [
     {
       matches = [
+        { app-id = "^\\.clash-verge-wrapped$"; }
         { app-id = "^io\\.github\\.clash-verge-rev\\.clash-verge-rev$"; }
       ];
-      open-on-workspace = "8";
+      open-on-workspace = "9";
     }
   ];
 }

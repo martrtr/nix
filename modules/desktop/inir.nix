@@ -7,6 +7,7 @@
 }:
 let
   system = pkgs.stdenv.hostPlatform.system;
+  gsettingsSchemaDir = "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}/glib-2.0/schemas";
 
   optionalTop = name:
     lib.optional (builtins.hasAttr name pkgs) (builtins.getAttr name pkgs);
@@ -119,6 +120,7 @@ EOF
   ++ optionalTop "hyprpicker"
   ++ optionalKde "breeze-icons"
   ++ optionalKde "kconfig"
+  ++ optionalKde "kde-cli-tools"
   ++ optionalKde "kdialog"
   ++ optionalKde "kirigami"
   ++ optionalKde "plasma-integration"
@@ -186,6 +188,15 @@ EOF
         services/IconThemeService.qml
       sed -i '/''${font_name:+fixed=/iTerminalApplication=kitty -1' \
         scripts/colors/apply-gtk-theme.sh
+
+      # iNiR's launcher runs with `set -e`.  This helper ends with
+      # `[[ -n "$value" ]] && export …`; when the final optional Niri
+      # environment variable is absent, that test returns 1 and terminates
+      # `inir run --session` before Quickshell starts.  A successful explicit
+      # return makes absent optional variables harmless at login.
+      sed -i '/^apply_niri_app_environment() {$/,/^}$/ {
+        /^}$/i\    return 0
+      }' scripts/inir
     '';
 
     postInstall = (oldAttrs.postInstall or "") + ''
@@ -333,11 +344,13 @@ in
     "QT_PLUGIN_PATH=${inirQtPluginPath}"
     "INIR_VENV=${inirVenv}"
     "ILLOGICAL_IMPULSE_VIRTUAL_ENV=${inirVenv}"
+    "GSETTINGS_SCHEMA_DIR=${gsettingsSchemaDir}"
   ];
 
   environment.sessionVariables = {
     INIR_VENV = "${inirVenv}";
     ILLOGICAL_IMPULSE_VIRTUAL_ENV = "${inirVenv}";
+    GSETTINGS_SCHEMA_DIR = gsettingsSchemaDir;
   };
 
   environment.systemPackages = inirRuntimePackages;

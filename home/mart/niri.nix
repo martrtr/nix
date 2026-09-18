@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   xdgDataDirs = lib.concatStringsSep ":" [
     config.xdg.dataHome
@@ -29,6 +29,7 @@ in
       XDG_STATE_HOME = config.xdg.stateHome;
       XDG_DATA_DIRS = xdgDataDirs;
       QT_QPA_PLATFORM = "wayland";
+      GSETTINGS_SCHEMA_DIR = "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}/glib-2.0/schemas";
       QT_LOGGING_RULES = "quickshell.dbus.properties=false";
     };
 
@@ -121,6 +122,7 @@ in
       "07".name = "7";
       "08".name = "8";
       "09".name = "9";
+      "10".name = "10";
     };
 
     spawn-at-startup = [
@@ -223,6 +225,7 @@ in
       {
         matches = [
           { app-id = "^obsidian$"; }
+          { app-id = "^md\\.Obsidian$"; }
           { app-id = "^org\\.keepassxc\\.KeePassXC$"; }
         ];
         open-on-workspace = "5";
@@ -365,6 +368,7 @@ in
       "Mod+7".action.focus-workspace = 7;
       "Mod+8".action.focus-workspace = 8;
       "Mod+9".action.focus-workspace = 9;
+      "Mod+0".action.focus-workspace = 10;
       "Mod+Ctrl+1".action.move-column-to-workspace = 1;
       "Mod+Ctrl+2".action.move-column-to-workspace = 2;
       "Mod+Ctrl+3".action.move-column-to-workspace = 3;
@@ -374,6 +378,7 @@ in
       "Mod+Ctrl+7".action.move-column-to-workspace = 7;
       "Mod+Ctrl+8".action.move-column-to-workspace = 8;
       "Mod+Ctrl+9".action.move-column-to-workspace = 9;
+      "Mod+Ctrl+0".action.move-column-to-workspace = 10;
       "Mod+Page_Down".action.focus-workspace-down = { };
       "Mod+Page_Up".action.focus-workspace-up = { };
       "Mod+Ctrl+Page_Down".action.move-column-to-workspace-down = { };

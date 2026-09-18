@@ -103,6 +103,7 @@ substituteInPlace modules/common/functions/ShellExec.qml \
                         --description="$desc" -- "$@"' \
   --replace-fail '                exec "$systemd_run" --user --quiet --collect --same-dir --scope -- "$@"' '                exec "$systemd_run" --user --quiet --collect --same-dir -- "$@"'
 
+
 substituteInPlace scripts/colors/apply-gtk-theme.sh \
   --replace-fail 'enable_apps_shell="true"
 enable_qt_apps="true"
@@ -202,24 +203,3 @@ systemctl --user restart xdg-desktop-portal.service 2>/dev/null || true'
 sed -i \
   '/gsettings get/s/")$/" || true)/' \
   scripts/colors/apply-gtk-theme.sh
-
-substituteInPlace services/FontSyncService.qml \
-  --replace-fail '            "/usr/bin/kwriteconfig6",' '            "true",'
-
-substituteInPlace services/IconThemeService.qml \
-  --replace-fail '        id: kdeGlobalsUpdateProc
-        property string themeName: ""
-        property bool skipRestart: false
-        command: [
-            "/usr/bin/python3",
-            "-c",
-            `
-import configparser' '        id: kdeGlobalsUpdateProc
-        property string themeName: ""
-        property bool skipRestart: false
-        command: [
-            "true",
-            "-c",
-            `
-import configparser' \
-  --replace-fail '            "/usr/bin/kwriteconfig6",' '            "true",'

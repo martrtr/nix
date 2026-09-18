@@ -6,6 +6,7 @@
   ...
 }:
 let
+  gsettingsSchemaDir = "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}/glib-2.0/schemas";
   inirPackage = osConfig.programs.inir.package;
   inirRuntime = "${inirPackage}/share/quickshell/inir";
   inirThemePath = lib.makeBinPath (
@@ -20,6 +21,7 @@ let
     set -eu
 
     export PATH=${lib.escapeShellArg inirThemePath}
+    export GSETTINGS_SCHEMA_DIR=${lib.escapeShellArg gsettingsSchemaDir}
 
     state_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/quickshell/user/generated"
     ready=""
@@ -49,10 +51,8 @@ let
   '';
 in
 {
-  # Zen and Clash Verge are started as user services after the persisted iNiR
-  # palette has been applied. Starting them directly in Niri races the theme
-  # generator on every login and leaves long-running applications with the
-  # default theme.
+  # Keep application startup declarative. Clash Verge uses its own XDG
+  # autostart entry; do not create a second systemd launcher for it.
   programs.niri.settings.spawn-at-startup = lib.mkForce [
     { sh = "gsettings set org.gnome.desktop.interface color-scheme prefer-dark || true; gsettings set org.gnome.desktop.interface gtk-theme adw-gtk3-dark || true; gsettings set org.gnome.desktop.interface icon-theme WhiteSur-dark || true; systemctl --user import-environment QT_PLUGIN_PATH QT_QPA_PLATFORM QT_QPA_PLATFORMTHEME QT_STYLE_OVERRIDE XDG_CURRENT_DESKTOP XDG_MENU_PREFIX XDG_CONFIG_HOME XDG_DATA_HOME XDG_CACHE_HOME XDG_STATE_HOME XDG_DATA_DIRS && dbus-update-activation-environment QT_PLUGIN_PATH QT_QPA_PLATFORM QT_QPA_PLATFORMTHEME QT_STYLE_OVERRIDE XDG_CURRENT_DESKTOP XDG_MENU_PREFIX XDG_CONFIG_HOME XDG_DATA_HOME XDG_CACHE_HOME XDG_STATE_HOME XDG_DATA_DIRS && kbuildsycoca6 --noincremental"; }
     { argv = [ "wl-paste" "--type" "text" "--watch" "cliphist" "store" ]; }
@@ -91,9 +91,6 @@ in
         Description = "Apply persisted iNiR themes to desktop applications";
         Requires = [ "inir.service" ];
         After = [ "inir.service" ];
-        Before = [
-          "clash-verge-autostart.service"
-        ];
         PartOf = [ "inir.service" ];
       };
       Service = {
@@ -104,19 +101,5 @@ in
       Install.WantedBy = [ "niri.service" ];
     };
 
-    clash-verge-autostart = {
-      Unit = {
-        Description = "Start Clash Verge Rev in the graphical session";
-        Wants = [ "inir-theme-apply.service" ];
-        After = [ "inir-theme-apply.service" ];
-        PartOf = [ "niri.service" ];
-      };
-      Service = {
-        ExecStart = "/run/current-system/sw/bin/clash-verge";
-        Restart = "on-failure";
-        RestartSec = 3;
-      };
-      Install.WantedBy = [ "niri.service" ];
-    };
   };
 }

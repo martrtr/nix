@@ -7,6 +7,7 @@
 }:
 let
   system = pkgs.stdenv.hostPlatform.system;
+  chatgpt = import ./chatgpt.nix { inherit pkgs; };
   keepassxcInitialConfig = pkgs.writeText "keepassxc-initial.ini" ''
     [Browser]
     Enabled=true
@@ -39,16 +40,34 @@ let
     "telemetry.telemetryLevel" = "off";
     "update.mode" = "none";
   });
+  # Zen's upstream version (1.21.x) does not reflect its Gecko version (154).
+  # The generic wrapFirefox logic therefore omits the FFmpeg 8 libraries that
+  # Gecko needs for H.264/AAC streams such as Twitch.
+  zenWithTwitchCodecs =
+    let
+      zen = inputs.zen-browser.packages.${system}.default;
+    in
+    pkgs.symlinkJoin {
+      name = "zen-browser-with-twitch-codecs";
+      paths = [ zen ];
+      nativeBuildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        rm "$out/bin/zen"
+        makeWrapper "${zen}/bin/zen" "$out/bin/zen" \
+          --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ pkgs.ffmpeg_8 ]}"
+      '';
+    };
 in
 {
   home.packages = [
-    inputs.zen-browser.packages.${system}.default
+    zenWithTwitchCodecs
     inputs.ayugram-desktop.packages.${system}.default
   ]
   ++ (with pkgs; [
     pear-desktop
     mihomo
     qbittorrent
+    chatgpt
 
     aseprite
     krita
@@ -99,6 +118,7 @@ in
     unzip
     zip
     p7zip
+    unrar
     ffmpeg
     imagemagick
     yt-dlp
@@ -237,6 +257,10 @@ in
 
   programs.bash.enable = true;
   programs.fish.enable = true;
+  programs.zoxide = {
+    enable = true;
+    enableFishIntegration = true;
+  };
 
   gtk = {
     enable = true;

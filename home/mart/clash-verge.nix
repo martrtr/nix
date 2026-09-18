@@ -19,6 +19,10 @@ let
       endpoint-independent-nat: true
       udp-timeout: 300
       mtu: 1500
+      # Keep overlay networks out of Mihomo's TUN routing.  Radmin VPN owns
+      # this range via its TAP adapter, including Minecraft peer traffic.
+      route-exclude-address:
+        - 26.0.0.0/8
       dns-hijack:
         - any:53
         - tcp://any:53

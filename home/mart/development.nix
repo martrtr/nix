@@ -1,4 +1,11 @@
 { pkgs, ... }:
+let
+  rintawaDev = pkgs.writeShellScriptBin "rintawa" ''
+    set -euo pipefail
+    cd /srv/apps/rintawa
+    exec ${pkgs.cargo}/bin/cargo run --quiet --locked -p rintawa -- "$@"
+  '';
+in
 {
   home.packages = with pkgs; [
     codex
@@ -18,5 +25,6 @@
     jq
     micro
     ripgrep
+    rintawaDev
   ];
 }
