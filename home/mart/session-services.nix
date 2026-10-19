@@ -51,8 +51,8 @@ let
   '';
 in
 {
-  # Keep application startup declarative. Clash Verge uses its own XDG
-  # autostart entry; do not create a second systemd launcher for it.
+  # Keep ordinary application startup declarative. Throne is started by the
+  # dedicated throne-autostart user service so it can receive the Qt theme env.
   programs.niri.settings.spawn-at-startup = lib.mkForce [
     { sh = "gsettings set org.gnome.desktop.interface color-scheme prefer-dark || true; gsettings set org.gnome.desktop.interface gtk-theme adw-gtk3-dark || true; gsettings set org.gnome.desktop.interface icon-theme WhiteSur-dark || true; systemctl --user import-environment QT_PLUGIN_PATH QT_QPA_PLATFORM QT_QPA_PLATFORMTHEME QT_STYLE_OVERRIDE XDG_CURRENT_DESKTOP XDG_MENU_PREFIX XDG_CONFIG_HOME XDG_DATA_HOME XDG_CACHE_HOME XDG_STATE_HOME XDG_DATA_DIRS && dbus-update-activation-environment QT_PLUGIN_PATH QT_QPA_PLATFORM QT_QPA_PLATFORMTHEME QT_STYLE_OVERRIDE XDG_CURRENT_DESKTOP XDG_MENU_PREFIX XDG_CONFIG_HOME XDG_DATA_HOME XDG_CACHE_HOME XDG_STATE_HOME XDG_DATA_DIRS && kbuildsycoca6 --noincremental"; }
     { argv = [ "wl-paste" "--type" "text" "--watch" "cliphist" "store" ]; }

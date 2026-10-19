@@ -2,11 +2,11 @@
 let
   bedrockOnLinux = pkgs.appimageTools.wrapType2 rec {
     pname = "bedrock-on-linux";
-    version = "2.2.1";
+    version = "1.3.0";
 
     src = pkgs.fetchurl {
       url = "https://github.com/Wyze3306/BedrockOnLinux/releases/download/v${version}/BedrockOnLinux-${version}-x86_64.AppImage";
-      hash = "sha256-Nx1y3l836S9cTchlVyoxKjP5EXgphEe/eWgUN7oDuZI=";
+      hash = "sha256-HqC0UuiBPANT2dxGm3qsxMlYGoMI9WaznyX7AEw5cug=";
     };
 
     extraPkgs = pkgs: with pkgs; [

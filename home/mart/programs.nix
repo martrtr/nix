@@ -65,14 +65,12 @@ in
   ]
   ++ (with pkgs; [
     pear-desktop
-    mihomo
     qbittorrent
     chatgpt
 
     aseprite
     krita
     # inkscape
-    kdePackages.kdenlive
     element-desktop
     reaper
 

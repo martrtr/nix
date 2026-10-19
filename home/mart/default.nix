@@ -13,10 +13,10 @@
     ./session-services.nix
     ./application-themes.nix
     ./audio.nix
+    ./video.nix
     ./music.nix
     ./bedrock-on-linux.nix
     ./no-network-tray.nix
-    ./clash-verge.nix
   ];
 
   home.username = settings.username;

@@ -130,7 +130,6 @@ in
       { argv = [ "wl-paste" "--type" "text" "--watch" "cliphist" "store" ]; }
       { argv = [ "wl-paste" "--type" "image" "--watch" "cliphist" "store" ]; }
       { argv = [ "zen-browser" ]; }
-      { argv = [ "throne" ]; }
       { argv = [ "steam" ]; }
       { argv = [ "AyuGram" ]; }
       { argv = [ "obsidian" ]; }
@@ -206,7 +205,6 @@ in
         matches = [
           { app-id = "^codium$"; }
           { app-id = "^krita$"; }
-          { app-id = "^org\\.kde\\.kdenlive$"; }
           { app-id = "^Aseprite$"; }
         ];
         open-on-workspace = "2";

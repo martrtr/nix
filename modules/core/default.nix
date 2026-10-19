@@ -8,7 +8,7 @@
     ./apps-directory.nix
     ./certificates.nix
     ./speech.nix
-    ./clash-verge.nix
+    ./throne.nix
     ./kokoro.nix
   ];
 
@@ -18,21 +18,9 @@
     enable = true;
     checkReversePath = "loose";
 
-    # Clash Verge / Mihomo TUN interfaces. Keep the historical relaxed
-    # reverse-path filtering fix for Discord RTC and explicitly trust traffic
-    # arriving from the TUN device so nftables does not drop return UDP.
-    trustedInterfaces = [
-      "Mihomo"
-      "Meta"
-      # Radmin is a private authenticated overlay.  Minecraft "Open to LAN"
-      # chooses a random TCP port, so allowing only 25565 would still block
-      # every hosted LAN world from Radmin peers.
-      "radminvpn0"
-    ];
-
-    extraReversePathFilterRules = ''
-      iifname { "Mihomo", "Meta" } accept comment "allow Clash Verge TUN"
-    '';
+    # Radmin is a private authenticated overlay. Minecraft "Open to LAN"
+    # chooses a random TCP port, so trust the overlay interface itself.
+    trustedInterfaces = [ "radminvpn0" ];
 
     allowedTCPPorts = [
       # Minecraft server.
@@ -41,6 +29,8 @@
       8188
       # llama.cpp, compatible with Ollama clients on the local network.
       11434
+      # Rintawa web layer.
+      44719
     ];
 
     # Simple Voice Chat and Webcam mod use separate UDP sockets.
@@ -120,11 +110,9 @@
     fstrim.enable = true;
     flatpak.enable = true;
 
-    # Keep the host resolver independent from Clash Verge/Mihomo. When the TUN
-    # process is stopped or fails during startup, /etc/resolv.conf must still
-    # point at a live resolver instead of becoming an empty resolvconf file.
-    # NetworkManager feeds per-link DNS into resolved; public DNS is only a
-    # fallback when the active link does not provide usable resolvers.
+    # Keep the host resolver independent from the proxy client. NetworkManager
+    # feeds per-link DNS into resolved; public DNS is only a fallback when the
+    # active link does not provide usable resolvers.
     resolved = {
       enable = true;
       settings.Resolve.FallbackDNS = [

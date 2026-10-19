@@ -25,7 +25,7 @@ let
     exec ${pkgs.coreutils}/bin/env \
       QT_QPA_PLATFORMTHEME=kde \
       QT_STYLE_OVERRIDE=Darkly \
-      /run/current-system/sw/bin/Throne
+      /run/current-system/sw/bin/Throne -tray
   '';
 in
 {
@@ -44,11 +44,21 @@ in
       fi
     '';
 
-  systemd.user.services.throne-autostart.Service = {
-    ExecStart = lib.mkForce throneSystemTheme;
-    Environment = [
-      "QT_QPA_PLATFORMTHEME=kde"
-      "QT_STYLE_OVERRIDE=Darkly"
-    ];
+  systemd.user.services.throne-autostart = {
+    Unit = {
+      Description = "Throne proxy client";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = lib.mkForce throneSystemTheme;
+      Restart = "on-failure";
+      RestartSec = 2;
+      Environment = [
+        "QT_QPA_PLATFORMTHEME=kde"
+        "QT_STYLE_OVERRIDE=Darkly"
+      ];
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
   };
 }
