@@ -118,6 +118,7 @@
     in
     {
       nixosConfigurations.desktop = mkHost ./hosts/desktop;
+      nixosConfigurations.laptop = mkHost ./hosts/laptop;
 
       packages.${system} = {
         inir = self.nixosConfigurations.desktop.config.programs.inir.package;
