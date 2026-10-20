@@ -47,6 +47,30 @@ in
   services.power-profiles-daemon.enable = true;
   services.fstrim.enable = true;
 
+  # Optional launchers that explicitly select the discrete NVIDIA GPU.
+  # Keeping plain PrismLauncher and plain DaVinci available on the AMD APU
+  # avoids forcing the RTX 3060 to stay awake for every desktop application.
+  home-manager.users.mart.xdg.dataFile = lib.mkIf primeReady {
+    "applications/prismlauncher-rtx.desktop".text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=PrismLauncher (RTX 3060)
+      Exec=nvidia-offload prismlauncher
+      Icon=prismlauncher
+      Categories=Game;
+      Terminal=false
+    '';
+    "applications/davinci-resolve-rtx.desktop".text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=DaVinci Resolve (RTX 3060)
+      Exec=nvidia-offload davinci-resolve-nixos
+      Icon=davinci-resolve
+      Categories=AudioVideo;Video;
+      Terminal=false
+    '';
+  };
+
   # No desktop-specific OpenRGB motherboard or ROCm ICD in this laptop host.
   environment.systemPackages = with pkgs; [
     vulkan-tools
