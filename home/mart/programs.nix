@@ -3,6 +3,7 @@
   inputs,
   lib,
   pkgs,
+  laptopHost ? false,
   ...
 }:
 let
@@ -68,7 +69,7 @@ in
     qbittorrent
     chatgpt
 
-    aseprite
+    # Aseprite uses large GitHub submodules; skip on the mobile laptop.
     krita
     # inkscape
     element-desktop
@@ -126,7 +127,7 @@ in
     adw-gtk3
     whitesur-icon-theme
     capitaine-cursors
-  ]);
+  ]) ++ lib.optionals (!laptopHost) [ pkgs.aseprite ];
 
   programs.git = {
     enable = true;
