@@ -121,7 +121,17 @@ fi
 
 cd "$REPO"
 echo '==> Evaluating and building laptop configuration (no activation yet)'
-nixos-rebuild build --flake .#laptop
+build_log="/tmp/nixos-laptop-build.log"
+echo "Saving complete build output to $build_log"
+if nixos-rebuild build --flake .#laptop 2>&1 | tee "$build_log"; then
+  echo 'Build succeeded.'
+else
+  echo '==> Build failed; no system switch was attempted.' >&2
+  echo "Complete log: $build_log" >&2
+  echo '==> Relevant errors (the FIRST failure usually matters):' >&2
+  grep -E -m 25 '(^error:|error:|failure:|failed with|Cannot build|Reason:|builder for)' "$build_log" >&2 || true
+  exit 1
+fi
 echo '==> Build succeeded; activating laptop configuration'
 nixos-rebuild switch --flake .#laptop
 echo 'Laptop configuration activated. Reboot to load NVIDIA driver if required.'
