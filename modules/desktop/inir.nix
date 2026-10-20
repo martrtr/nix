@@ -3,6 +3,7 @@
   inputs,
   lib,
   pkgs,
+  inirPythonInterpreter ? pkgs.python3,
   ...
 }:
 let
@@ -16,17 +17,17 @@ let
       builtins.getAttr name pkgs.kdePackages
     );
   optionalPython =
-    name:
-    lib.optional (builtins.hasAttr name pkgs.python3Packages) (
-      builtins.getAttr name pkgs.python3Packages
+    pythonPackages: name:
+    lib.optional (builtins.hasAttr name pythonPackages) (
+      builtins.getAttr name pythonPackages
     );
 
   # Equivalent of upstream sdata/uv/requirements.in, built by Nix rather than
   # downloaded into a mutable per-user venv.
-  inirPython = pkgs.python3.withPackages (
-    _:
+  inirPython = inirPythonInterpreter.withPackages (
+    pythonPackages:
     lib.concatLists (
-      map optionalPython [
+      map (optionalPython pythonPackages) [
         "click"
         "evdev"
         "kde-material-you-colors"
