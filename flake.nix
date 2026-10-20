@@ -96,10 +96,10 @@
       ];
 
       mkHost =
-        hostModule:
+        hostModule: inirPythonInterpreter:
         nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit inputs settings; };
+          specialArgs = { inherit inputs settings inirPythonInterpreter; };
           modules = [
             hostModule
             disko.nixosModules.disko
@@ -117,8 +117,10 @@
         };
     in
     {
-      nixosConfigurations.desktop = mkHost ./hosts/desktop;
-      nixosConfigurations.laptop = mkHost ./hosts/laptop;
+      # Keep the old desktop package set unchanged.
+      nixosConfigurations.desktop = mkHost ./hosts/desktop pkgs.python3;
+      # Python 3.13 is currently safer for the iNiR third-party ecosystem.
+      nixosConfigurations.laptop = mkHost ./hosts/laptop pkgs.python313;
 
       packages.${system} = {
         inir = self.nixosConfigurations.desktop.config.programs.inir.package;
