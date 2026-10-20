@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-export NIX_CONFIG="experimental-features = nix-command flakes"
+# These client-side Nix settings reduce failures on unstable mobile links:
+# fewer simultaneous downloads, no HTTP/2 multiplexing, and more retries.
+# An externally supplied NIX_CONFIG takes precedence for custom VPN/proxy setups.
+if [[ -z "${NIX_CONFIG:-}" ]]; then
+  export NIX_CONFIG="$(cat <<'NIX_CONF'
+experimental-features = nix-command flakes
+http2 = false
+http-connections = 3
+download-attempts = 20
+connect-timeout = 30
+stalled-download-timeout = 300
+NIX_CONF
+)"
+fi
 
 # Read-only by default. No partitioning, formatting, disko or disk wipes.
 REPO="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
