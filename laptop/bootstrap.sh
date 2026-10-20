@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+export NIX_CONFIG="experimental-features = nix-command flakes"
 
 # Read-only by default. No partitioning, formatting, disko or disk wipes.
 REPO="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
