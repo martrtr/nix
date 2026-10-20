@@ -89,20 +89,29 @@ for path in /sys/bus/pci/devices/*; do
   esac
 done
 
-if [[ -z "$amd" || -z "$nvidia" ]]; then
-  echo "Both GPU IDs must be detected: AMD=${amd:-missing} NVIDIA=${nvidia:-missing}" >&2
-  echo 'Switch BIOS to Hybrid/Optimus mode, then inspect again.' >&2
+if [[ -z "$nvidia" ]]; then
+  echo 'NVIDIA GPU not detected in PCI devices. Refusing to switch.' >&2
   exit 1
+fi
+
+if [[ -n "$amd" ]]; then
+  # Hybrid/Optimus: use both real PCI IDs for PRIME.
+  amd_value="\"$amd\""
+  echo "Detected hybrid graphics: AMD=$amd NVIDIA=$nvidia"
+else
+  # Dedicated GPU mode: firmware hides the AMD iGPU; PRIME is not needed.
+  amd_value='null'
+  echo "Detected NVIDIA-only graphics: $nvidia"
+  echo 'The AMD iGPU is hidden, possibly by the BIOS MUX switch.'
+  echo 'This is a supported setup; continuing without PRIME.'
 fi
 
 cat > "$HOST/gpu-ids.nix" <<EOF
 {
-  amdgpuBusId = "$amd";
+  amdgpuBusId = $amd_value;
   nvidiaBusId = "$nvidia";
 }
 EOF
-
-echo "Detected PRIME GPUs: AMD=$amd NVIDIA=$nvidia"
 echo 'Hardware configuration copied; existing disks/partitions untouched.'
 
 if [[ "$MODE" == --prepare ]]; then
