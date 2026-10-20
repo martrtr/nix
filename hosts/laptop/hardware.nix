@@ -1,7 +1,9 @@
 { config, lib, pkgs, ... }:
 let
   gpu = import ./gpu-ids.nix;
-  primeReady = gpu.amdgpuBusId != null && gpu.nvidiaBusId != null;
+  nvidiaReady = gpu.nvidiaBusId != null;
+  amdReady = gpu.amdgpuBusId != null;
+  primeReady = amdReady && nvidiaReady;
 in
 {
   # The old desktop hardware module configured RX 7800 XT and a Gigabyte
@@ -11,16 +13,19 @@ in
     enable = true;
     enable32Bit = true;
   };
+  # A MUX switch can hide the AMD iGPU completely. In dGPU-only mode
+  # NVIDIA drives the display directly, without PRIME.
   services.xserver.videoDrivers =
-    [ "amdgpu" ] ++ lib.optionals primeReady [ "nvidia" ];
+    (lib.optionals amdReady [ "amdgpu" ])
+    ++ (lib.optionals nvidiaReady [ "nvidia" ]);
 
-  hardware.nvidia = lib.mkIf primeReady {
-    # RTX 3060 is Ampere; NVIDIA's open kernel module supports it.
+  hardware.nvidia = lib.mkIf nvidiaReady {
+    # RTX 3060 (Ampere) supports NVIDIA's official open kernel modules.
     open = true;
     modesetting.enable = true;
     nvidiaSettings = true;
     package = config.boot.kernelPackages.nvidiaPackages.stable;
-    prime = {
+    prime = lib.mkIf primeReady {
       offload.enable = true;
       offload.enableOffloadCmd = true;
       amdgpuBusId = gpu.amdgpuBusId;
@@ -47,15 +52,14 @@ in
   services.power-profiles-daemon.enable = true;
   services.fstrim.enable = true;
 
-  # Optional launchers that explicitly select the discrete NVIDIA GPU.
-  # Keeping plain PrismLauncher and plain DaVinci available on the AMD APU
-  # avoids forcing the RTX 3060 to stay awake for every desktop application.
-  home-manager.users.mart.xdg.dataFile = lib.mkIf primeReady {
+  # Use offload only in hybrid mode; a dGPU-only system runs both apps
+  # directly, because "nvidia-offload" is not available or needed there.
+  home-manager.users.mart.xdg.dataFile = lib.mkIf nvidiaReady {
     "applications/prismlauncher-rtx.desktop".text = ''
       [Desktop Entry]
       Type=Application
       Name=PrismLauncher (RTX 3060)
-      Exec=nvidia-offload prismlauncher
+      Exec=${if primeReady then "nvidia-offload " else ""}prismlauncher
       Icon=prismlauncher
       Categories=Game;
       Terminal=false
@@ -64,7 +68,7 @@ in
       [Desktop Entry]
       Type=Application
       Name=DaVinci Resolve (RTX 3060)
-      Exec=nvidia-offload davinci-resolve-nixos
+      Exec=${if primeReady then "nvidia-offload " else ""}davinci-resolve-nixos
       Icon=davinci-resolve
       Categories=AudioVideo;Video;
       Terminal=false
